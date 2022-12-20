@@ -14,7 +14,7 @@ const userSchema = new Schema({
   about: {
     type: String,
     required: true,
-    menlength: 2,
+    minlength: 2,
     maxlength: 30,
     default: 'Исследователь',
   },
