@@ -10,7 +10,7 @@ exports.getUserById = (req, res) => {
   Users.findById(req.params.userId)
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         return res.status(400).send({message: 'Переданы некорректные данные юзера!'})
       }
       if (err.message === 'NotFound') {
