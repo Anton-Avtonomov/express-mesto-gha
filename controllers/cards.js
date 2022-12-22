@@ -8,7 +8,7 @@ exports.getCards = (req, res) => {
   Cards.find({})
     .then((card) => {
       if (card) {
-        return res.status(201).send({ data: card });
+        return res.status(200).send({ data: card });
       } else {
         return res.status(400).send({ message: 'Запрашиваемая карточка не найдена!' });
       }
@@ -38,9 +38,9 @@ exports.createCard = (req, res) => {
     .catch((err) => {
       // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err.name === 'ValidationError') {
-        res.status(400).send('Ошибка валидации отправленных данных');
+        res.status(400).send({message: 'Ошибка валидации отправленных данных!'});
       } else {
-        res.status(500).send('Произошла ошибка!');
+        res.status(500).send({message: 'Произошла ошибка!'});
       }
     })
     .finally(() => {
@@ -68,24 +68,25 @@ exports.deleteCard = (req, res) => {
 };
 
 exports.likeCard = (res, req) => {
-  const owner = req.user._id;
+  const owner = req.params.cardId;
+  console.log(req.params);
 
   Cards.findByIdAndUpdate(
     req.params.cardId,
     owner,
     { $addToSet: { likes: req.user._id } },
-
     { new: true },
   )
+
     .then((card) => {
-      res.status(200).send({ data: card });
+      res.status(201).send({ data: card });
     })
     .catch((err) => {
       console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err) {
-        res.status(404).send({ message: 'Переданы некорректные данные для функции лайка.' });
+        res.status(404).send({ message: 'Переданы некорректные данные для функции лайка!' });
       } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+        res.status(500).send({ message: 'Произошла ошибка!' });
       }
     })
     .finally(() => {
@@ -94,7 +95,7 @@ exports.likeCard = (res, req) => {
 };
 
 exports.dislikeCard = (res, req) => {
-  const owner = req.user._id;
+  const owner = req.params.cardId;
 
   Cards.findByIdAndUpdate(
     req.params.cardId,
@@ -104,7 +105,7 @@ exports.dislikeCard = (res, req) => {
     { new: true },
   )
     .then((card) => {
-      res.status(200).send({ data: card });
+      res.status(201).send({ data: card });
     })
     .catch((err) => {
       console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
