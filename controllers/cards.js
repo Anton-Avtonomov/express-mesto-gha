@@ -3,11 +3,12 @@ const Cards = require('../models/card');
 
 // Запрос получения карточки
 exports.getCards = (req, res) => {
+  console.log(req.body);
   // find - фильтр
   Cards.find({})
     .then((card) => {
       if (card) {
-        res.status(200).send({ data: card });
+        res.status(201).send({ data: card });
       } else {
         res.status(400).send({ message: 'Запрашиваемая карточка не найдена!' });
       }
@@ -23,13 +24,15 @@ exports.getCards = (req, res) => {
 // Запрос создания карточки
 exports.createCard = (req, res) => {
 // Достаем свойства из запроса
-  const owner = req.user_id;
+  const owner = req.user._id;
   const { name, link } = req.body;
+  // Проверка
+  console.log(name, link, req.user._id);
 
   Cards.create({ name, link, owner })
     .then((card) => {
       Cards.find({}).populate(['owner', 'likes']);
-      res.status(200).send(card);
+      res.status(201).send(card);
     })
     .catch((err) => {
       if (err) {
@@ -43,7 +46,7 @@ exports.createCard = (req, res) => {
 exports.deleteCard = (req, res) => {
   Cards.delete({})
     .then((card) => {
-      res.status(200).send(card);
+      res.status(201).send(card);
     })
     .catch((err) => {
       if (err) {
