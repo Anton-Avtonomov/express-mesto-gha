@@ -24,8 +24,13 @@ app.use('/users', usersRoutes);
 app.use('/cards', cardsRoutes);
 
 // Проверка сервера
-app.get('/', (req, res) => {
-  res.send('Приложение работает!');
+// app.get('/', (req, res) => {
+//   res.send('Приложение работает!');
+// });
+
+app.get('*', (req, res) => {
+  console.log(req)
+  res.status(404).send(`Указанный адрес: 'http://localhost:3000${req.url}' - не найден!`);
 });
 
 

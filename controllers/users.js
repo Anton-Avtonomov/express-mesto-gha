@@ -6,6 +6,9 @@ exports.getUsers = (req, res) => {
     .catch(() => {
       // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       res.status(500).send({ message: 'Запрашиваемый пользователь не найден' })
+    })
+    .finally(() => {
+      console.log('Получен запрос на получение списка пользователей');
     });
 };
 
@@ -15,7 +18,7 @@ exports.getUserById = (req, res) => {
     if (!user) {
       return res.status(404).send({message: 'Пользователь с указанными ID в базе не найден!'})
     }
-    return res.status(201).send(user)})
+    return res.status(200).send(user)})
     .catch((err) => {
       // Проверка
       // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
@@ -24,6 +27,9 @@ exports.getUserById = (req, res) => {
       }
       return res.status(500).send({message: 'Произошла ошибка!'})
     })
+    .finally(() => {
+      console.log('Получен запрос на получение данных пользователя');
+    });
 };
 
 exports.createUser = (req, res) => {
@@ -44,6 +50,9 @@ exports.createUser = (req, res) => {
         return res.status(404).send({message: 'Пользователь с указанными данными уже существует!'})
       }
       return res.status(500).send({message: 'Произошла ошибка!'})
+    })
+    .finally(() => {
+      console.log('Получен запрос на создание пользователя');
     });
 };
 
@@ -54,7 +63,7 @@ exports.updateProfile = (req, res) => {
   // Если ответ будет пустым конструкция orFail перекинет в блок catch
   .orFail(new Error('NotValidId'))
   .then((user) => {
-     res.status(201).send(user);
+     res.status(200).send(user);
   })
   .catch((err) => {
     // Проверка
@@ -63,6 +72,9 @@ exports.updateProfile = (req, res) => {
       return res.status(400).send({message: 'Переданы некорректные данные профиля!'})
     }
     return res.status(500).send({message: 'Произошла ошибка!'})
+  })
+  .finally(() => {
+    console.log('Получен запрос на изменение данных карточки LIKE');
   });
 };
 
@@ -82,5 +94,8 @@ exports.updateAvatar = (req, res) => {
         return res.status(400).send({message: 'Переданы некорректная ссылка на изображения аватара!'})
       }
       return res.status(500).send({message: 'Произошла ошибка!'})
+    })
+    .finally(() => {
+      console.log('Получен запрос на изменение автара пользователя');
     });
 };

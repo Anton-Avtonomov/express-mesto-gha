@@ -8,16 +8,17 @@ exports.getCards = (req, res) => {
   Cards.find({})
     .then((card) => {
       if (card) {
-        res.status(201).send({ data: card });
+        return res.status(201).send({ data: card });
       } else {
-        res.status(400).send({ message: 'Запрашиваемая карточка не найдена!' });
+        return res.status(400).send({ message: 'Запрашиваемая карточка не найдена!' });
       }
     })
     .catch(() => {
-      res.status(500).send({ message: 'Произошла ошибка!' });
+      // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
+      return res.status(500).send({ message: 'Произошла ошибка!' });
     })
     .finally(() => {
-      console.log(`req.body = ${req.body}, result = ${res}`);
+      console.log('Получен запрос на получение карточек');
     });
 };
 
@@ -35,25 +36,34 @@ exports.createCard = (req, res) => {
       res.status(201).send(card);
     })
     .catch((err) => {
-      if (err) {
-        res.status(400).send(err.message);
+      // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
+      if (err.name === 'ValidationError') {
+        res.status(400).send('Ошибка валидации отправленных данных');
       } else {
         res.status(500).send('Произошла ошибка!');
       }
+    })
+    .finally(() => {
+      console.log('Получен запрос на создание карточки');
     });
 };
 
 exports.deleteCard = (req, res) => {
   Cards.delete({})
+    .orFail(new Error ('NotFoundCard'))
     .then((card) => {
       res.status(201).send(card);
     })
     .catch((err) => {
-      if (err) {
+      console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
+      if (err.message === 'NotFoundCard') {
         res.status(404).send({ message: 'Карточка с указанным ID не найдена!' });
       } else {
         res.status(500).send({ message: 'Произошла ошибка!' });
       }
+    })
+    .finally(() => {
+      console.log('Получен запрос на удаление карточки');
     });
 };
 
@@ -71,11 +81,15 @@ exports.likeCard = (res, req) => {
       res.status(200).send({ data: card });
     })
     .catch((err) => {
+      console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err) {
         res.status(404).send({ message: 'Переданы некорректные данные для функции лайка.' });
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
       }
+    })
+    .finally(() => {
+      console.log('Получен запрос на добавление LIKE');
     });
 };
 
@@ -93,10 +107,14 @@ exports.dislikeCard = (res, req) => {
       res.status(200).send({ data: card });
     })
     .catch((err) => {
+      console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err) {
         res.status(404).send({ message: 'Переданы некорректные данные для функции лайка.' });
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
       }
+    })
+    .finally(() => {
+      console.log('Получен запрос на удаления LIKE');
     });
 };
