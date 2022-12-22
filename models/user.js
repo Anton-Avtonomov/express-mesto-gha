@@ -1,6 +1,7 @@
 // Подключаем базу данных MongoDB
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
 
 // Создаю схему для пользователя(валидация)
 const userSchema = new Schema({

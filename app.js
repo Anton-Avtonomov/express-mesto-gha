@@ -29,9 +29,8 @@ app.use('/cards', cardsRoutes);
 // });
 
 app.patch('*', (req, res) => {
-  res.status(404).send({message: `Указанный адрес: 'http://localhost:3000${req.url}' - не найден!`});
+  res.status(404).send({ message: `Указанный адрес: 'http://localhost:3000${req.url}' - не найден!` });
 });
-
 
 // Подключаемся к серверу mongo!
 mongoose.set('strictQuery', true);
@@ -40,9 +39,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 // Указываем порт для сервера
 const { PORT = 3000 } = process.env;
 
-
-//Устанавливаем слушатель порта!
+// Устанавливаем слушатель порта!
 app.listen(PORT, () => {
   // Проверка сервера
-  console.log(`Сервер запущен на порту: ${PORT}, в ${new Date}`);
+  console.log(`Сервер запущен на порту: ${PORT}, в ${new Date()}`);
 });

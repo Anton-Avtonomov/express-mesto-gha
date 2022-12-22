@@ -1,3 +1,5 @@
+/* eslint-disable implicit-arrow-linebreak */
+/* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
 const Cards = require('../models/card');
 
@@ -9,14 +11,12 @@ exports.getCards = (req, res) => {
     .then((card) => {
       if (card) {
         return res.status(200).send({ data: card });
-      } else {
-        return res.status(400).send({ message: 'Запрашиваемая карточка не найдена!' });
       }
+      return res.status(400).send({ message: 'Запрашиваемая карточка не найдена!' });
     })
-    .catch(() => {
+    .catch(() =>
       // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
-      return res.status(500).send({ message: 'Произошла ошибка!' });
-    })
+      res.status(500).send({ message: 'Произошла ошибка!' }))
     .finally(() => {
       console.log('Получен запрос на получение карточек');
     });
@@ -38,9 +38,9 @@ exports.createCard = (req, res) => {
     .catch((err) => {
       // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err.name === 'ValidationError') {
-        res.status(400).send({message: 'Ошибка валидации отправленных данных!'});
+        res.status(400).send({ message: 'Ошибка валидации отправленных данных!' });
       } else {
-        res.status(500).send({message: 'Произошла ошибка!'});
+        res.status(500).send({ message: 'Произошла ошибка!' });
       }
     })
     .finally(() => {
@@ -50,7 +50,7 @@ exports.createCard = (req, res) => {
 
 exports.deleteCard = (req, res) => {
   Cards.deleteMany({})
-    .orFail(new Error ('NotFoundCardId'))
+    .orFail(new Error('NotFoundCardId'))
     .then((card) => {
       res.status(200).send(card);
     })
