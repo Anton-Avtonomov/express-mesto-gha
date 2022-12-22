@@ -28,7 +28,7 @@ app.use('/cards', cardsRoutes);
 //   res.send('Приложение работает!');
 // });
 
-app.get('*', (req, res) => {
+app.patch('*', (req, res) => {
   res.status(404).send({message: `Указанный адрес: 'http://localhost:3000${req.url}' - не найден!`});
 });
 
