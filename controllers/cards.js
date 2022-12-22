@@ -49,15 +49,15 @@ exports.createCard = (req, res) => {
 };
 
 exports.deleteCard = (req, res) => {
-  Cards.delete({})
-    .orFail(new Error ('NotFoundCard'))
+  Cards.deleteMany({})
+    .orFail(new Error ('NotFoundCardId'))
     .then((card) => {
-      res.status(201).send(card);
+      res.status(200).send(card);
     })
     .catch((err) => {
       console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
-      if (err.message === 'NotFoundCard') {
-        res.status(404).send({ message: 'Карточка с указанным ID не найдена!' });
+      if (err.message === 'NotFoundCardId') {
+        res.status(404).send({ message: `Карточка с ID '${req.url}' не найдена!` });
       } else {
         res.status(500).send({ message: 'Произошла ошибка!' });
       }
