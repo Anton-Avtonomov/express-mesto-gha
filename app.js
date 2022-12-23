@@ -1,14 +1,26 @@
+/* eslint-disable no-console */
 // Импортируем модули
 const express = require('express');
 const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const usersRoutes = require('./routes/users');
 const cardsRoutes = require('./routes/cards');
 
 // Создаем приложение!
 const app = express();
 
+const limitter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window (here, per 15 minutes)
+  standardHeaders: true, // Return rate limit info in the RateLimit-* headers
+  legacyHeaders: false, // Disable the X-RateLimit-* headers
+});
+
 // Подключаем мидлвар для обработки req.body!
 app.use(express.json());
+app.use(limitter);
+app.use(helmet());
 
 // Добавляем в каждый запрос(req) поле user с полем _id
 app.use((req, res, next) => {
@@ -27,8 +39,8 @@ app.use('/cards', cardsRoutes);
 // app.get('/', (req, res) => {
 //   res.send('Приложение работает!');
 // });
-
-app.patch('*', (req, res) => {
+// Или app.use
+app.all('*', (req, res) => {
   res.status(404).send({ message: `Указанный адрес: 'http://localhost:3000${req.url}' - не найден!` });
 });
 

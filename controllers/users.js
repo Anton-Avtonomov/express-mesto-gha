@@ -44,7 +44,6 @@ exports.createUser = (req, res) => {
     .catch((err) => {
       // Проверка
       // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
-      console.log(err.name);
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Переданы некорректные данные Юзера!' });
       }
@@ -61,7 +60,7 @@ exports.createUser = (req, res) => {
 exports.updateProfile = (req, res) => {
   const { name, about } = req.body;
 
-  Users.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+  Users.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
   // Если ответ будет пустым конструкция orFail перекинет в блок catch
     .orFail(new Error('NotValidId'))
     .then((user) => {
@@ -84,15 +83,16 @@ exports.updateAvatar = (req, res) => {
   const owner = req.user._id;
   const { avatar } = req.body;
 
-  Users.findByIdAndUpdate(owner, { avatar }, { new: true })
-    .orFail(new Error('NotValidLinkAvatar'))
-    .then((user) => {
-      res.status(200).send(user);
-    })
+  Users.findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
+    .orFail(new Error('NotValidId'))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
     // Проверка
-    // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
-      if (err.message === 'NotValidLinkAvatar') {
+      console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
+      if (err.message === 'NotValidId') {
+        return res.status(404).send({ message: 'Пользователь с указанным ID в базе не найден!' });
+      }
+      if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Переданы некорректная ссылка на изображения аватара!' });
       }
       return res.status(500).send({ message: 'Произошла ошибка!' });

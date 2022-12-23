@@ -1,10 +1,10 @@
 // Подключаем базу данных MongoDB
 const mongoose = require('mongoose');
 
-const { Schema } = mongoose;
+const validator = require('validator');
 
 // Создаю схему для пользователя(валидация)
-const userSchema = new Schema({
+const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -20,6 +20,10 @@ const userSchema = new Schema({
   avatar: {
     type: String,
     required: true,
+    validate: {
+      validator: (value) => validator.isURL(value),
+      message: 'Введен некорректный URL!',
+    },
   },
 });
 
