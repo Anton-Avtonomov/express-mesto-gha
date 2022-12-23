@@ -70,7 +70,10 @@ exports.updateProfile = (req, res) => {
     // Проверка
       console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err.message === 'NotValidId') {
-        return res.status(400).send({ message: 'Переданы некорректные данные профиля!' });
+        return res.status(404).send({ message: 'Переданы некорректные данные профиля!' });
+      }
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Ошибка валидации' });
       }
       return res.status(500).send({ message: 'Произошла ошибка!' });
     })

@@ -57,63 +57,61 @@ exports.deleteCard = (req, res) => {
     .catch((err) => {
       console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err.message === 'NotFoundCardId') {
-        res.status(404).send({ message: `Карточка с ID '${req.url}' не найдена!` });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка!' });
+        return res.status(404).send({ message: 'Карточка с указанным ID  не найдена!' });
       }
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'кастомная ошибка!' });
+      }
+      return res.status(500).send({ message: 'Произошла ошибка!' });
     })
     .finally(() => {
       console.log('Получен запрос на удаление карточки');
     });
 };
 
-exports.likeCard = (res, req) => {
-  const owner = req.params.cardId;
-  console.log(req.params);
-
+exports.likeCard = (req, res) => {
   Cards.findByIdAndUpdate(
     req.params.cardId,
-    owner,
-    { $addToSet: { likes: req.user._id } },
-    { new: true },
+    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+    { new: true }, // передать в ответ обновленный объект
   )
-
     .then((card) => {
       res.status(201).send({ data: card });
     })
     .catch((err) => {
       console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
-      if (err) {
-        res.status(404).send({ message: 'Переданы некорректные данные для функции лайка!' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка!' });
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Переданы некорректные данные для добавления лайка!' });
       }
+      if (err.message === 'NotFound') {
+        return res.status(404).send({ message: 'ID карточки не найден!' });
+      }
+      return res.status(500).send({ message: 'Произошла ошибка!' });
     })
     .finally(() => {
       console.log('Получен запрос на добавление LIKE');
     });
 };
 
-exports.dislikeCard = (res, req) => {
-  const owner = req.params.cardId;
-
+exports.dislikeCard = (req, res) => {
   Cards.findByIdAndUpdate(
     req.params.cardId,
-    owner,
-    { $pull: { likes: req.user._id } },
-
-    { new: true },
+    { $pull: { likes: req.user._id } }, // убрать _id из массива
+    { new: true }, // передать в ответ обновленный объект
   )
+    .orFail(new Error('NotFound'))
     .then((card) => {
       res.status(201).send({ data: card });
     })
     .catch((err) => {
       console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
-      if (err) {
-        res.status(404).send({ message: 'Переданы некорректные данные для функции лайка.' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибка' });
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Переданы некорректные данные для функции лайка.' });
       }
+      if (err.message === 'NotFound') {
+        return res.status(404).send({ message: `Карточка с указанным ID: '${req.params}' не найдена!` });
+      }
+      return res.status(500).send({ message: 'Произошла ошибка' });
     })
     .finally(() => {
       console.log('Получен запрос на удаления LIKE');
