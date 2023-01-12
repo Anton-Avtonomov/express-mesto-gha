@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+const bcrypt = require('bcrypt');
 const Users = require('../models/user');
 
 exports.getUsers = (req, res) => {
@@ -35,8 +35,15 @@ exports.getUserById = (req, res) => {
 };
 
 exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  Users.create({ name, about, avatar })
+  // Хеширование пароля
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => Users.create({
+      name: req.body.name,
+      about: req.body.about,
+      avatar: req.body.avatar,
+      email: req.body.email,
+      password: hash,
+    }))
   // user - ответ сервера
     .then((user) => {
       res.status(201).send(user);
