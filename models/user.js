@@ -5,6 +5,20 @@ const validator = require('validator');
 
 // Создаю схему для пользователя(валидация)
 const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    validate: {
+      validator: (value) => validator.isEmail(value),
+      message: 'Введён некорректный email!',
+    },
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false, // Скрывает поле при запроссах(не отправляет!)
+  },
   name: {
     type: String,
     default: 'Жак-Ив Кусто',
@@ -24,19 +38,6 @@ const userSchema = new mongoose.Schema({
       validator: (value) => validator.isURL(value),
       message: 'Введен некорректный URL!',
     },
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    validate: {
-      validator: (value) => validator.isEmail(value),
-      message: 'Введён некорректный email!',
-    },
-  },
-  password: {
-    type: String,
-    required: true,
   },
 });
 

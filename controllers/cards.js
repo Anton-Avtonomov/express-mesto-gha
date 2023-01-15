@@ -1,10 +1,13 @@
+/* eslint-disable consistent-return */
 /* eslint-disable implicit-arrow-linebreak */
 /* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
 const Cards = require('../models/card');
+const NotFoundError = require('../errors/NotFoundError'); // 404
+const RequestError = require('../errors/RequestError'); // 400
 
 // Запрос получения карточки
-exports.getCards = (req, res) => {
+exports.getCards = (req, res, next) => {
   console.log(req.body);
   // find - фильтр
   Cards.find({})
@@ -12,18 +15,18 @@ exports.getCards = (req, res) => {
       if (card) {
         return res.status(200).send({ data: card });
       }
-      return res.status(400).send({ message: 'Запрашиваемая карточка не найдена!' });
+      next(new RequestError('Запрашиваемая карточка не найдена!'));
     })
     .catch(() =>
       // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
-      res.status(500).send({ message: 'Произошла ошибка!' }))
+      next())
     .finally(() => {
       console.log('Получен запрос на получение карточек');
     });
 };
 
 // Запрос создания карточки
-exports.createCard = (req, res) => {
+exports.createCard = (req, res, next) => {
 // Достаем свойства из запроса
   const owner = req.user._id;
   const { name, link } = req.body;
@@ -38,9 +41,9 @@ exports.createCard = (req, res) => {
     .catch((err) => {
       // console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Ошибка валидации отправленных данных!' });
+        next(new RequestError('Ошибка валидации отправленных данных!'));
       } else {
-        res.status(500).send({ message: 'Произошла ошибка!' });
+        next();
       }
     })
     .finally(() => {
@@ -48,7 +51,7 @@ exports.createCard = (req, res) => {
     });
 };
 
-exports.deleteCard = (req, res) => {
+exports.deleteCard = (req, res, next) => {
   Cards.deleteMany({})
     .orFail(new Error('NotFoundCardId'))
     .then((card) => {
@@ -57,19 +60,19 @@ exports.deleteCard = (req, res) => {
     .catch((err) => {
       console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err.message === 'NotFoundCardId') {
-        return res.status(404).send({ message: 'Карточка с указанным ID  не найдена!' });
+        next(new NotFoundError('Карточка с указанным ID  не найдена!'));
       }
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'кастомная ошибка!' });
+        next(new RequestError('кастомная ошибка!'));
       }
-      return res.status(500).send({ message: 'Произошла ошибка!' });
+      next();
     })
     .finally(() => {
       console.log('Получен запрос на удаление карточки');
     });
 };
 
-exports.likeCard = (req, res) => {
+exports.likeCard = (req, res, next) => {
   Cards.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -81,19 +84,19 @@ exports.likeCard = (req, res) => {
     .catch((err) => {
       console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные для добавления лайка!' });
+        next(new RequestError('Переданы некорректные данные для добавления лайка!'));
       }
       if (err.message === 'NotFound') {
-        return res.status(404).send({ message: 'ID карточки не найден!' });
+        next(new NotFoundError('ID карточки не найден!'));
       }
-      return res.status(500).send({ message: 'Произошла ошибка!' });
+      next();
     })
     .finally(() => {
       console.log('Получен запрос на добавление LIKE');
     });
 };
 
-exports.dislikeCard = (req, res) => {
+exports.dislikeCard = (req, res, next) => {
   Cards.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
@@ -106,12 +109,12 @@ exports.dislikeCard = (req, res) => {
     .catch((err) => {
       console.log(`Имя ошибки: '${err.name}', текст ошибки: '${err.message}'`);
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные для функции лайка.' });
+        next(new RequestError('Переданы некорректные данные для функции лайка!'));
       }
       if (err.message === 'NotFound') {
-        return res.status(404).send({ message: `Карточка с указанным ID: '${req.params}' не найдена!` });
+        next(new NotFoundError(`Карточка с указанным ID: '${req.params}' не найдена!`));
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      next();
     })
     .finally(() => {
       console.log('Получен запрос на удаления LIKE');

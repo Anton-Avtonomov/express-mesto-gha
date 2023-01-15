@@ -2,57 +2,77 @@
 // Импортируем модули
 const express = require('express');
 const mongoose = require('mongoose');
-const rateLimit = require('express-rate-limit');
-const helmet = require('helmet');
+const rateLimit = require('express-rate-limit'); // Защита от DDOS attack - лимиттер запросов
+const helmet = require('helmet');// Защита от XSS attack
+const { celebrate, Joi } = require('celebrate'); // Валидация роутов
+const auth = require('./middlewares/auth');
 const usersRoutes = require('./routes/users');
 const cardsRoutes = require('./routes/cards');
+const { createUser, login } = require('./controllers/users');
+const commonErrors = require('./middlewares/commonErrors'); // Общие ошибки
 
-// Создаем приложение!
-const app = express();
+const app = express(); // Создаем приложение!
 
-const limitter = rateLimit({
+const limitter = rateLimit({ // Параметры лимиттера
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per window (here, per 15 minutes)
   standardHeaders: true, // Return rate limit info in the RateLimit-* headers
   legacyHeaders: false, // Disable the X-RateLimit-* headers
 });
 
-// Подключаем мидлвар для обработки req.body!
-app.use(express.json());
-app.use(limitter);
-app.use(helmet());
+app.use(express.json()); // Подключаем мидлвар для обработки req.body!
+app.use(limitter); // Активируем лимиттер
+app.use(helmet()); // Активируем helmet
 
-// Добавляем в каждый запрос(req) поле user с полем _id
-app.use((req, res, next) => {
-  req.user = {
-    _id: '63a16a8c35787a894250e061',
-  };
+// // Добавляем в каждый запрос(req) поле user с полем _id
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: '63a16a8c35787a894250e061',
+//   };
+//   next();
+// });
 
-  next();
+// Маршрутизация ,без верификации
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string(),
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), createUser);
+
+// Марштуризация с верификацией 'auth'
+app.use('/users', auth, usersRoutes);
+app.use('/cards', auth, cardsRoutes);
+app.all('*', auth, (req, res) => { // Все Неизвестные роуты
+  res.status(404).send({ message: `Указанный адрес: 'http://localhost:3000${req.url}' - не найден!` });
 });
-
-// Марштуризация
-app.use('/users', usersRoutes);
-app.use('/cards', cardsRoutes);
 
 // Проверка сервера
 // app.get('/', (req, res) => {
 //   res.send('Приложение работает!');
 // });
-// Или app.use
-app.all('*', (req, res) => {
-  res.status(404).send({ message: `Указанный адрес: 'http://localhost:3000${req.url}' - не найден!` });
-});
+async function startServer() {
+  try {
+    mongoose.set('strictQuery', true);
+    await mongoose.connect('mongodb://localhost:27017/mestodb'); // Подключаемся к серверу БД>!
+    const { PORT = 3000 } = process.env; // Указываем порт для сервера, по умолчанию 3000
+    app.listen(PORT, () => { // Устанавливаем слушатель порта!
+      console.log(`Сервер запущен на порту: ${PORT}, в ${new Date()}`); // Проверка сервера
+    });
+  } catch (err) {
+    console.log(`Возникла ошибка: "${err}" при запуске сервера!`);
+  }
+}
 
-// Подключаемся к серверу mongo!
-mongoose.set('strictQuery', true);
-mongoose.connect('mongodb://localhost:27017/mestodb');
+startServer();
 
-// Указываем порт для сервера
-const { PORT = 3000 } = process.env;
-
-// Устанавливаем слушатель порта!
-app.listen(PORT, () => {
-  // Проверка сервера
-  console.log(`Сервер запущен на порту: ${PORT}, в ${new Date()}`);
-});
+app.use(commonErrors); // Общие ошибки
