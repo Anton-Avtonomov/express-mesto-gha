@@ -1,23 +1,21 @@
-// Подключаем базу данных MongoDB
-const mongoose = require('mongoose');
-// Подключаем Валидатор
-const validator = require('validator');
+const mongoose = require('mongoose'); // Подключаем базу данных MongoDB
+const validator = require('validator'); // Подключаем Валидатор
 
 // Создаю схему для пользователя(валидация)
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
     validate: {
       validator: (value) => validator.isEmail(value),
-      message: 'Введён некорректный email!',
+      message: 'Ошибка валидации, введён некорректный email!',
     },
-    unique: true,
   },
   password: {
     type: String,
     required: true,
-    select: false, // Скрывает поле при запроссах(не отправляет!)
+    select: false, // Скрывает поле при запросах(не отправляет!)
   },
   name: {
     type: String,

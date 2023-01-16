@@ -4,7 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit'); // Защита от DDOS attack - лимиттер запросов
 const helmet = require('helmet');// Защита от XSS attack
-const { celebrate, Joi } = require('celebrate'); // Валидация роутов
+const { celebrate, Joi, errors } = require('celebrate'); // Валидация запросов
 const auth = require('./middlewares/auth');
 const usersRoutes = require('./routes/users');
 const cardsRoutes = require('./routes/cards');
@@ -43,15 +43,15 @@ app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string(),
+    avatar: Joi.string().pattern(/https?:\/\/(www\.)?\d?\D{1,}#?/),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
 }), createUser);
 
 // Марштуризация с верификацией 'auth'
-app.use('/users', auth, usersRoutes);
-app.use('/cards', auth, cardsRoutes);
+app.use('/users', usersRoutes);
+app.use('/cards', cardsRoutes);
 app.all('*', auth, (req, res) => { // Все Неизвестные роуты
   res.status(404).send({ message: `Указанный адрес: 'http://localhost:3000${req.url}' - не найден!` });
 });
@@ -75,4 +75,5 @@ async function startServer() {
 
 startServer();
 
-app.use(commonErrors); // Общие ошибки
+app.use(errors()); // обработчик ошибок JOI
+app.use(commonErrors); // обработчик общих ошибок
