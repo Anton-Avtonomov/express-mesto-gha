@@ -19,17 +19,17 @@ const cardSchema = new mongoose.Schema({
   },
   owner: {
     ref: 'user',
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Types.ObjectId,
     required: true,
   },
-  likes: {
-    type: Array,
+  likes: [{
+    type: mongoose.Types.ObjectId,
     default: [],
-  },
+  }],
   createAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-module.exports = mongoose.model('card', cardSchema);
+module.exports = mongoose.model('cards', cardSchema); // cards - название коллекции в
