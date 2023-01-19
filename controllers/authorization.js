@@ -21,7 +21,7 @@ exports.login = (req, res, next) => {
             return Promise.reject(new AuthorizationError('Неправильная почта или пароль!'));
           }
           const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' }); // Создаём JWT на 7 дней
-          res.status(201).cookie('jwt', token, {
+          res.status(200).cookie('jwt', token, {
             maxAge: 3600000 * 24 * 7, // Задаём срок хранения кука в неделю час * 24 * 7дней
             httpOnly: true, // Запрещаем доступ к куку из JS
           })

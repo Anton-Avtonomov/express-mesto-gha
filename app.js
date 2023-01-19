@@ -31,7 +31,7 @@ app.post('/signin', validationRouteSignIn, login);
 app.post('/signup', validationRouteSignUp, createUser);
 
 // Марштуризация с верификацией 'auth'
-app.use('/users', usersRoutes);
+app.use('/users', auth, usersRoutes);
 app.use('/cards', auth, cardsRoutes);
 
 app.all('*', (req, res, next) => { // Все Неизвестные роуты

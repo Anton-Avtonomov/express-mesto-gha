@@ -1,5 +1,5 @@
 const usersRoutes = require('express').Router();
-const auth = require('../middlewares/auth');
+
 const {
   getUsers,
   getUserById,
@@ -13,12 +13,12 @@ const {
   validationFindUserById,
 } = require('../middlewares/joi');
 
-usersRoutes.get('/', auth, getUsers);
+usersRoutes.get('/', getUsers);
 
-usersRoutes.patch('/me', auth, validationUpdateUserInfo, updateProfile);
+usersRoutes.patch('/me', validationUpdateUserInfo, updateProfile);
 
-usersRoutes.patch('/me/avatar', auth, validationUpdateUserAvatar, updateAvatar);
+usersRoutes.patch('/me/avatar', validationUpdateUserAvatar, updateAvatar);
 
-usersRoutes.get('/:userId', auth, validationFindUserById, getUserById);
+usersRoutes.get('/:userId', validationFindUserById, getUserById);
 
 module.exports = usersRoutes;
