@@ -11,6 +11,7 @@ const usersRoutes = require('./routes/users');
 const cardsRoutes = require('./routes/cards');
 const { createUser, login } = require('./controllers/authorization');
 const centerErrors = require('./middlewares/centerErrors');
+const NotFoundError = require('./errors/NotFoundError');
 
 const app = express(); // Создаем приложение!
 
@@ -41,8 +42,8 @@ app.post('/signup', validationRouteSignUp, createUser);
 app.use('/users', auth, usersRoutes);
 app.use('/cards', auth, cardsRoutes);
 
-app.all('*', (req, res) => { // Все Неизвестные роуты
-  res.status(404).send({ message: `Указанный адрес: 'http://localhost:3000${req.url}' - не найден!` });
+app.all('*', (req, res, next) => { // Все Неизвестные роуты
+  next(new NotFoundError('Ошибка 404. Страница не найдена!'));
 });
 
 // Проверка сервера
