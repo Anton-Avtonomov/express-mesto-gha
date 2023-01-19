@@ -26,30 +26,18 @@ app.use(express.json()); // Подключаем мидлвар для обра�
 app.use(limitter); // Активируем лимиттер
 app.use(helmet()); // Активируем helmet
 
-// // Добавляем в каждый запрос(req) поле user с полем _id
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '63a16a8c35787a894250e061',
-//   };
-//   next();
-// });
-
 // Маршрутизация ,без верификации
 app.post('/signin', validationRouteSignIn, login);
 app.post('/signup', validationRouteSignUp, createUser);
 
 // Марштуризация с верификацией 'auth'
-app.use('/users', auth, usersRoutes);
+app.use('/users', usersRoutes);
 app.use('/cards', auth, cardsRoutes);
 
 app.all('*', (req, res, next) => { // Все Неизвестные роуты
   next(new NotFoundError('Ошибка 404. Страница не найдена!'));
 });
 
-// Проверка сервера
-// app.get('/', (req, res) => {
-//   res.send('Приложение работает!');
-// });
 async function startServer() {
   try {
     mongoose.set('strictQuery', true);
