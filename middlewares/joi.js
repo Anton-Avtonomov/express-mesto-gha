@@ -1,5 +1,5 @@
 const { celebrate, Joi } = require('celebrate');
-const { validateUrl, validateId } = require('../utils/regex');
+const { validateUrl } = require('../utils/regex');
 
 module.exports.validationRouteSignUp = celebrate({
   body: Joi.object().keys({
@@ -14,13 +14,13 @@ module.exports.validationRouteSignUp = celebrate({
 module.exports.validationRouteSignIn = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required(),
+    password: Joi.string().required().min(4),
   }),
 });
 
 module.exports.validationFindUserById = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().required().custom(validateId),
+    userId: Joi.string().required(),
   }),
 });
 

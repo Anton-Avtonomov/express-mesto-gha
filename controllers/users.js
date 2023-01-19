@@ -11,7 +11,7 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getUserById = (req, res, next) => {
-  Users.findById(req.params.userId)
+  Users.findById(req.user._id)
     .orFail(() => next(new NotFoundError('Пользователь с указанными ID в базе не найден!')))
     .then((user) => {
       res.status(200).send(user);
@@ -19,15 +19,15 @@ module.exports.getUserById = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('В запросе переданы некорректные данные ID пользователя!'));
-      } else { next(err); }
+      }
+      next(err);
     });
 };
 
 module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
-  const owner = req.user._id;
 
-  Users.findByIdAndUpdate(owner, { name, about }, { new: true, runValidators: true })
+  Users.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
@@ -40,10 +40,9 @@ module.exports.updateProfile = (req, res, next) => {
 };
 
 module.exports.updateAvatar = (req, res, next) => {
-  const owner = req.user._id;
   const { avatar } = req.body;
 
-  Users.findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
+  Users.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
