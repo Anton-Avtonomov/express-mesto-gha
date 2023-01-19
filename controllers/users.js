@@ -2,13 +2,15 @@ const Users = require('../models/user');// импортируем модуль �
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const BadRequestError = require('../errors/BadRequestError'); // 400
 
-exports.getUsers = (req, res, next) => {
+module.exports.getUsers = (req, res, next) => {
   Users.find({})
-    .then((user) => res.staus(200).send(user))
+    .then((user) => {
+      res.status(200).send(user);
+    })
     .catch(() => next(new NotFoundError('Запрашиваемый пользователь не найден')));
 };
 
-exports.getUserById = (req, res, next) => {
+module.exports.getUserById = (req, res, next) => {
   Users.findById(req.params.userId)
     .orFail(() => next(new NotFoundError('Пользователь с указанными ID в базе не найден!')))
     .then((user) => {
@@ -21,7 +23,7 @@ exports.getUserById = (req, res, next) => {
     });
 };
 
-exports.updateProfile = (req, res, next) => {
+module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   const owner = req.user._id;
 
@@ -37,7 +39,7 @@ exports.updateProfile = (req, res, next) => {
     });
 };
 
-exports.updateAvatar = (req, res, next) => {
+module.exports.updateAvatar = (req, res, next) => {
   const owner = req.user._id;
   const { avatar } = req.body;
 
@@ -51,4 +53,4 @@ exports.updateAvatar = (req, res, next) => {
         next(new BadRequestError('Переданы некорректная ссылка на изображения аватара!'));
       } else { next(err); }
     });
-}; // final
+};

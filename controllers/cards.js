@@ -4,7 +4,7 @@ const BadRequestError = require('../errors/BadRequestError'); // 400
 const ForbiddenError = require('../errors/ForbiddenError'); // 403
 
 // Запрос получения карточки
-exports.getCards = (req, res, next) => {
+module.exports.getCards = (req, res, next) => {
   Cards.find({}) // find - фильтр
     .then((card) => {
       res.status(200).send({ data: card });
@@ -14,7 +14,7 @@ exports.getCards = (req, res, next) => {
 };
 
 // Запрос создания карточки
-exports.createCard = (req, res, next) => {
+module.exports.createCard = (req, res, next) => {
   // Достаем свойства из запроса
   const owner = req.user._id;
   const { name, link } = req.body;
@@ -30,7 +30,7 @@ exports.createCard = (req, res, next) => {
     });
 };
 
-exports.deleteCardById = (req, res, next) => {
+module.exports.deleteCardById = (req, res, next) => {
   const { cardId } = req.params;
   Cards.findById(cardId)
     .orFail(() => {
@@ -48,7 +48,7 @@ exports.deleteCardById = (req, res, next) => {
     .catch(next);
 };
 
-exports.likeCard = (req, res, next) => {
+module.exports.likeCard = (req, res, next) => {
   Cards.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -67,7 +67,7 @@ exports.likeCard = (req, res, next) => {
     });
 };
 
-exports.dislikeCard = (req, res, next) => {
+module.exports.dislikeCard = (req, res, next) => {
   Cards.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
