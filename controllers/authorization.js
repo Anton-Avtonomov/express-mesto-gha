@@ -12,25 +12,24 @@ exports.login = (req, res, next) => {
   Users.findOne({ email }).select('+password') // Ищем пользователя в БД по email  и Добавляем user поле .password!
     .then((user) => {
       if (!user) {
-        return Promise.reject(new AuthorizationError('Неправильные почта или пароль!'));
+        return Promise.reject(new AuthorizationError('Пользователь не зарегистрирован!'));
         // throw new AuthorizationError('Неправильные почта или пароль!');
       }
       bcrypt.compare(password, user.password) // Сравниваем пароль с данными БД
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new AuthorizationError('Неправильные почта или пароль!'));
+            return Promise.reject(new AuthorizationError('Неправильная почта или пароль!'));
           }
           const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' }); // Создаём JWT на 7 дней
-          res.status(201)
-            .cookie('jwt', token, {
-              maxAge: 3600000 * 24 * 7, // Задаём срок хранения кука в неделю час * 24 * 7дней
-              httpOnly: true, // Запрещаем доступ к куку из JS
-            })
+          res.status(201).cookie('jwt', token, {
+            maxAge: 3600000 * 24 * 7, // Задаём срок хранения кука в неделю час * 24 * 7дней
+            httpOnly: true, // Запрещаем доступ к куку из JS
+          })
             .send({ message: 'Успешная аунтификация, кук с JWT создан и отправлен!', jwt: token }); // если у ответа нет тела, можно использовать метод .end();
-        })
-        .catch((err) => {
-          next(err);
         });
+    })
+    .catch((err) => {
+      next(err);
     });
 };
 
@@ -58,7 +57,7 @@ exports.createUser = (req, res, next) => {
             next(new BadRequestError('Введены некорректные данные Юзера!'));
           } else if (err.message === 'NotFoundError') {
             next(new NotFoundError('Пользователь с указанными id не найден!'));
-          } else { next(err); }
+          } next(err);
         });
     }).catch(next);
 };

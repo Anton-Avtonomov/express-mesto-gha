@@ -13,7 +13,7 @@ const {
   validationFindUserById,
 } = require('../middlewares/joi');
 
-usersRoutes.get('/', getUsers);
+usersRoutes.get('/', auth, getUsers);
 
 usersRoutes.patch('/me', auth, validationUpdateUserInfo, updateProfile);
 
