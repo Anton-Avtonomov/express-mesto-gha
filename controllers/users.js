@@ -55,4 +55,4 @@ exports.updateAvatar = (req, res, next) => {
         next(new RequestError('Переданы некорректная ссылка на изображения аватара!'));
       } else { next(err); }
     });
-};
+}; // final
