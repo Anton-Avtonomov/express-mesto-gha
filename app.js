@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit'); // Защита от DDOS attack - лимиттер запросов
 const helmet = require('helmet');// Защита от XSS attack
+const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
 const { validationRouteSignUp, validationRouteSignIn } = require('./middlewares/joi');
@@ -25,7 +26,7 @@ const limitter = rateLimit({ // Параметры лимиттера
 app.use(express.json()); // Подключаем мидлвар для обработки req.body!
 app.use(limitter); // Активируем лимиттер
 app.use(helmet()); // Активируем helmet
-
+app.use(cookieParser()); // Создаём объект req.cookies
 // Маршрутизация ,без верификации
 app.post('/signin', validationRouteSignIn, login);
 app.post('/signup', validationRouteSignUp, createUser);
