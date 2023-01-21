@@ -14,13 +14,13 @@ module.exports.validationRouteSignUp = celebrate({
 module.exports.validationRouteSignIn = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(4),
+    password: Joi.string().required(),
   }),
 });
 
 module.exports.validationFindUserById = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().required(),
+    userId: Joi.string().required().hex(),
   }),
 });
 
@@ -28,7 +28,7 @@ module.exports.validationUpdateUserInfo = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
     about: Joi.string().min(2).max(30).required(),
-  }).unknown(true), // Разрешаем запросу иметь другие поля
+  }).unknown(true), // Разрешаем Joi пропускать запросы  в которых есть иные поля кроме перечисленны
 });
 
 module.exports.validationUpdateUserAvatar = celebrate({

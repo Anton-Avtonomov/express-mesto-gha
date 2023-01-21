@@ -7,20 +7,25 @@ module.exports.getUsers = (req, res, next) => {
     .then((user) => {
       res.status(200).send(user);
     })
-    .catch(() => next(new NotFoundError('Запрашиваемый пользователь не найден')));
+    .catch((err) => {
+      next(err);
+    });
 };
 
 module.exports.getUserById = (req, res, next) => {
   Users.findById(req.user._id)
-    .orFail(() => next(new NotFoundError('Пользователь с указанными ID в базе не найден!')))
+    .orFail(() => {
+      throw new NotFoundError('Пользователь с указанными ID в базе не найден!');
+    })
     .then((user) => {
       res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('В запросе переданы некорректные данные ID пользователя!'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -28,12 +33,12 @@ module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   Users.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail(new Error('NotValidId'))
+    .orFail(() => {
+      throw new NotFoundError('Пользователь не найден!');
+    })
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
-        next(new NotFoundError('Пользователь не найден!'));
-      } else if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные профиля!'));
       } else { next(err); }
     });

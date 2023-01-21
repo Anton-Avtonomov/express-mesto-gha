@@ -2,7 +2,6 @@
 const bcrypt = require('bcrypt'); // импортируем модуль хеширования
 const jwt = require('jsonwebtoken'); // импортируем модуль jsonwebtoken
 const Users = require('../models/user');// импортируем модуль схемы юзера
-const NotFoundError = require('../errors/NotFoundError'); // 404
 const AuthorizationError = require('../errors/AuthorizationError'); // 401
 const BadRequestError = require('../errors/BadRequestError'); // 400
 const ConflictError = require('../errors/ConflictError'); // 409
@@ -37,9 +36,6 @@ exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  if (!email || !password) {
-    throw new BadRequestError('Поле email или пароля не может быть пустым!');
-  }
   bcrypt.hash(password, 10) // Хеширование пароля
     .then((hash) => {
       Users.create({
@@ -55,9 +51,7 @@ exports.createUser = (req, res, next) => {
             next(new ConflictError(`Пользователь с указанными email: ${req.body.email} уже существует!`));
           } else if (err.name === 'ValidationError') {
             next(new BadRequestError('Введены некорректные данные Юзера!'));
-          } else if (err.message === 'NotFoundError') {
-            next(new NotFoundError('Пользователь с указанными id не найден!'));
-          } next(err);
+          } else { next(err); }
         });
     }).catch(next);
 };

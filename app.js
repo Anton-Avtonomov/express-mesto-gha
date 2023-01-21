@@ -34,10 +34,9 @@ app.post('/signup', validationRouteSignUp, createUser);
 app.use('/users', auth, usersRoutes);
 app.use('/cards', auth, cardsRoutes);
 
-app.all('*', (req, res, next) => { // Все Неизвестные роуты
+app.all('*', auth, (req, res, next) => { // Все Неизвестные роуты
   next(new NotFoundError('Ошибка 404. Страница не найдена!'));
 });
-
 async function startServer() {
   try {
     mongoose.set('strictQuery', true);
@@ -47,11 +46,11 @@ async function startServer() {
       console.log(`Сервер запущен на порту: ${PORT}, в ${new Date()}`); // Проверка сервера
     });
   } catch (err) {
-    console.log(`Возникла ошибка: "${err}" при запуске сервера!`);
+    console.log(new Error('Возникла ошибка при запуске сервера!'));
   }
 }
 
 startServer();
 
-app.use(errors()); // обработчик ошибок JOI
+app.use(errors()); // обработчик ошибок JOI, работает только с ошибками JOI, остальные пропускает
 app.use(centerErrors); // обработчик общих ошибок

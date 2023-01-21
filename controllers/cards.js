@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const Cards = require('../models/card');
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const BadRequestError = require('../errors/BadRequestError'); // 400
@@ -8,7 +9,6 @@ module.exports.getCards = (req, res, next) => {
   Cards.find({}) // find - фильтр
     .then((card) => {
       res.status(200).send({ data: card });
-      next(new BadRequestError('Запрашиваемая карточка не найдена!'));
     })
     .catch((err) => next(err)); // Передаю ошибку в централизованный обработчик ошибок
 };
@@ -31,8 +31,7 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCardById = (req, res, next) => {
-  const { cardId } = req.params;
-  Cards.findById(cardId)
+  Cards.findById(req.params.cardId)
     .orFail(() => {
       throw new NotFoundError('Карточка не найдена!');
     })
@@ -45,7 +44,13 @@ module.exports.deleteCardById = (req, res, next) => {
           res.send({ message: 'Карточка удалена!' });
         });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Неверный формат ID!'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -54,13 +59,17 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true }, // передать в ответ обновленный объект
   )
-    .orFail(new Error('NotFoundCardId')) // Если вернется пустой ответ
+    .orFail(() => {
+      throw new NotFoundError('Карточка не найдена!');
+    }) // Если вернется пустой ответ
     .then((card) => {
       res.status(200).send({ data: card });
     })
     .catch((err) => {
       if (err.message === 'NotFound') {
         next(new NotFoundError('ID карточки не найден!'));
+      } else if (err.name === 'CastError') {
+        next(new BadRequestError('Неверный формат ID!'));
       } else {
         next(err);
       }
