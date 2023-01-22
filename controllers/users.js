@@ -55,7 +55,11 @@ module.exports.updateProfile = (req, res, next) => {
 };
 
 module.exports.updateAvatar = (req, res, next) => {
-  Users.findByIdAndUpdate(req.user._id, req.body.avatar, { new: true, runValidators: true })
+  Users.findByIdAndUpdate(
+    req.user._id,
+    { avatar: req.body.avatar },
+    { new: true, runValidators: true }
+  )
     // Что ищем, на что меняем, в ответе отправлять сразу измененный объект поле валидации схемы
     .orFail(() => {
       throw new NotFoundError('Пользователь не найден!');
