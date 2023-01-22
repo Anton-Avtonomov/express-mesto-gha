@@ -58,7 +58,7 @@ module.exports.updateAvatar = (req, res, next) => {
   Users.findByIdAndUpdate(
     req.user._id,
     { avatar: req.body.avatar },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     // Что ищем, на что меняем, в ответе отправлять сразу измененный объект поле валидации схемы
     .orFail(() => {
