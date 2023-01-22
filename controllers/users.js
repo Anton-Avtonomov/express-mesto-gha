@@ -11,9 +11,19 @@ module.exports.getUsers = (req, res, next) => {
       next(err);
     });
 };
+// не смог придумать как переиспользовать метод getusers
+module.exports.getUserInfo = (req, res, next) => {
+  Users.findById(req.user._id)
+    .then((user) => {
+      res.status(200).send(user);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
 
 module.exports.getUserById = (req, res, next) => {
-  Users.findById(req.user._id)
+  Users.findById(req.params.userId)
     .orFail(() => {
       throw new NotFoundError('Пользователь с указанными ID в базе не найден!');
     })
@@ -45,15 +55,14 @@ module.exports.updateProfile = (req, res, next) => {
 };
 
 module.exports.updateAvatar = (req, res, next) => {
-  const { avatar } = req.body;
-
-  Users.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .orFail(new Error('NotValidId'))
+  Users.findByIdAndUpdate(req.user._id, req.body.avatar, { new: true, runValidators: true })
+    // Что ищем, на что меняем, в ответе отправлять сразу измененный объект поле валидации схемы
+    .orFail(() => {
+      throw new NotFoundError('Пользователь не найден!');
+    })
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
-        next(new NotFoundError('Пользователь с указанным ID в базе не найден!'));
-      } else if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректная ссылка на изображения аватара!'));
       } else { next(err); }
     });

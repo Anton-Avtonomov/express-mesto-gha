@@ -2,6 +2,7 @@ const usersRoutes = require('express').Router();
 
 const {
   getUsers,
+  getUserInfo,
   getUserById,
   updateAvatar,
   updateProfile,
@@ -14,6 +15,8 @@ const {
 } = require('../middlewares/joi');
 
 usersRoutes.get('/', getUsers);
+
+usersRoutes.get('/me', getUserInfo);
 
 usersRoutes.patch('/me', validationUpdateUserInfo, updateProfile);
 
