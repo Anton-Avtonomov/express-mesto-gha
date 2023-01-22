@@ -66,9 +66,7 @@ module.exports.likeCard = (req, res, next) => {
       res.status(200).send({ data: card });
     })
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        next(new NotFoundError('ID карточки не найден!'));
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Неверный формат ID!'));
       } else {
         next(err);
@@ -87,6 +85,10 @@ module.exports.dislikeCard = (req, res, next) => {
       res.status(200).send({ data: card });
     })
     .catch((err) => {
-      next(err);
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Неверный формат ID!'));
+      } else {
+        next(err);
+      }
     });
 };
